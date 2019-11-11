@@ -153,8 +153,8 @@ ARM {x} {y} {z} {T} {D} {M} {I} {E} {J} {F} {-S}
 * ARM存储方式
     * ARM地址空间 2^32 = 4G 字节
     * ARM态 PC + 4 , Thumb态 PC + 2
-    * 小端(little-Endian) : 从右往左读
-    * 大端(Big-Endian) : 从左往右读
+    * 小端(little-Endian) : 从左往右读
+    * 大端(Big-Endian) : 从右往左读
 
 ---
 ## ARM指令集寻址方式
