@@ -17,47 +17,74 @@
 * os_cpu.h
 ## 修改过程
 1. 建立工程
-<br>在现有的STM32keil工程上进行修改
-<br>在原有工程上加入uCOS-III内核文件
-修改后路径目录如下:
-<br>![image.png](https://i.loli.net/2019/11/09/W1835L9BNuaZS26.png)
+
+    在现有的STM32keil工程上进行修改
+    <br>在原有工程上加入uCOS-III内核文件  
+    1. 建立工程目录  
+    ![image.png](https://i.loli.net/2019/11/16/x8WwRpiEL6ISNUo.png) 
+    2. 加入uCOS-III系统内核文件  
+    将uCOS-III内核中的uC-CPU , uC-LIB , uCOS-III文件夹中文件直接复制到项目中的同名文件夹中.  
+    其中:   
+        * uC-CPU  中为与CPU有关的代码
+        * uC-LIB  中为库文件
+        * uCOS-III中为与CPU无关的一些核心代码
+    3. 向UCOS-CONFIG中添加文件  
+    ![image.png](https://img-blog.csdn.net/20180603163855807?watermark/2/text/aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MjEwODQ4NA==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70)  
+    此文件夹中主要为配置文件  
+    4. 向UCOS-BSP中添加文件  
+    ![h.png](https://img-blog.csdn.net/20180603164005397?watermark/2/text/aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MjEwODQ4NA==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70)  
+    此文件夹中主要为STM32F4的板级支持包  
+    5. 将上述文件添加入keil工程中  
+    至此 , 工程搭建完成 , 目的是方便管理 .
+
+
 2. 修改目标
-<br>在STM32中断向量表中,可以看到如下中断
-   ![image.png](https://i.loli.net/2019/11/09/fKDqezALHnRBNlZ.png)
-   需要将其连接到uCOS的中断上
-   先注释掉在stm32f4xx_it.c中的以下函数声明
-   ```c
-   void PendSV_Handler(void){}
-   void SysTick_Handler(void){}
-   ```
-   以免重复定义
+  <br>在STM32中断向量表中,可以看到如下中断
+  ![image.png](https://i.loli.net/2019/11/09/fKDqezALHnRBNlZ.png)
+  其中:
+    * PendSV_Handler  主要起上下文切换的缓冲作用
+    * SysTick_Handler 滴答定时器中断，这个中断相当于单片机的心脏  
+  这两个中断相当于单片机的神经 , 需要与uCOS的"神经"进行连接  
+  
+    先注释掉在stm32f4xx_it.c中的以下函数声明
+
+    ```c
+    void PendSV_Handler(void){}
+    void SysTick_Handler(void){}
+    ```
+    以免重复定义
+
 3. 修改os_cpu_a.asm
-<br>修改
-   ```
-   EXPORT  OS_CPU_PendSVHandler
-   ```
-   为
-   ```
-   EXPORT  PendSVHandler
-   ```
-   并将下面的定义
-   ```
-   OS_CPU_PendSVHandler
-   ```
-   修改为
-   ```
-   PendSVHandler
-   ```
+  <br>修改
+    ```
+    EXPORT  OS_CPU_PendSVHandler
+    ```
+    为
+    ```
+    EXPORT  PendSVHandler
+    ```  
+
+    并将下面的定义
+    ```
+    OS_CPU_PendSVHandler
+    ```
+    修改为
+    ```
+    PendSVHandler
+    ```
+    目的是让uCOS的PendSVHandler使用STM32的PendSVHandler
 4. 修改os_cpu_c.c
-<br>修改
-   ```c
-   void  OS_CPU_SysTickHandler (void)
-   ```
-   为
-   ```c
-   void  SysTickHandler (void)
-   ```
-   以上,修改完毕
+  <br>修改
+    ```c
+    void  OS_CPU_SysTickHandler (void)
+    ```
+    为
+    ```c
+    void  SysTickHandler (void)
+    ```
+    目的是让uCOS的SysTickHandler使用STM32的SysTickHandler  
+    
+    以上,修改完毕
 ## 测试
    1.编写串口初始化函数,用于调试:
    ```c
@@ -207,7 +234,7 @@
 		   delay_ms(500);			
 	   }
    }
-```
+   ```
    测试结果:
    ![image.png](https://i.loli.net/2019/11/09/q9pJ5aRozyIvXl2.png)
    可见,测试成功 !
